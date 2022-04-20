@@ -47,6 +47,7 @@ moneyManager.addMoneyCallback = ({ currency, amount }) => {
 			ProfileWidget.showProfile(resp.data);
 		}
 
+		//?проверить правильность кода:
 		//Также выведите сообщение об успехе или
 		//ошибку (причину неудачного действия) пополнении баланса в окне отображения сообщения (setMessage).
 		if(resp.success) {
@@ -66,6 +67,7 @@ moneyManager.conversionMoneyCallback = ({ fromCurrency, targetCurrency, fromAmou
 			ProfileWidget.showProfile(resp.data);
 		}
 
+		//?проверить правильность кода:
 		//Также выведите сообщение об успехе или
 		//ошибку (причину неудачного действия) пополнении баланса в окне отображения сообщения (setMessage).
 		if(resp.success) {
@@ -85,6 +87,7 @@ moneyManager.sendMoneyCallback = ({ to, currency, amount }) => {
 			ProfileWidget.showProfile(resp.data);
 		}
 
+		//?проверить правильность кода:
 		//Также выведите сообщение об успехе или
 		//ошибку (причину неудачного действия) пополнении баланса в окне отображения сообщения (setMessage).
 		if(resp.success) {
