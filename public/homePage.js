@@ -11,7 +11,6 @@ logoutButton.action = () => ApiConnector.logout(resp => {
 
 //!Получение информации о пользователе
 ApiConnector.current(resp => {
-	// console.log(resp);
 	
 	if(resp.success) {
 		ProfileWidget.showProfile(resp.data);
@@ -20,10 +19,12 @@ ApiConnector.current(resp => {
 
 //!Получение текущих курсов валюты
 const ratesBoard = new RatesBoard();
-// console.log(ratesBoard);
 
+//? ApiConnector.js:315 Произошла ошибка:  TypeError: callback is not a function
+
+//по логике мы должны прописать ratesBoard.метод = () => { ApiConnector.getStocks(resp => {....... }
+//но в описании классов у RatesBoard нет подходящего метода
 ApiConnector.getStocks(resp => {
-	// console.log(resp);
 
 	if(resp.success) {
 		ratesBoard.clearTable();
@@ -31,25 +32,22 @@ ApiConnector.getStocks(resp => {
 	}
 });
 
+ApiConnector.getStocks();
 // console.log(typeof ApiConnector.getStocks);
-//setTimeout(ApiConnector.getStocks, 60000); //??
+setTimeout(ApiConnector.getStocks, 60000);
 
 //!Операции с деньгами
 const moneyManager = new MoneyManager();
-// console.log(moneyManager);
 
 //!пополнение баланса
 moneyManager.addMoneyCallback = ({ currency, amount }) => {
 	ApiConnector.addMoney({ currency, amount }, resp => {
-		console.log(resp);
+		// console.log(resp);
 
 		if(resp.success) {
 			ProfileWidget.showProfile(resp.data);
 		}
 
-		//?проверить правильность кода:
-		//Также выведите сообщение об успехе или
-		//ошибку (причину неудачного действия) пополнении баланса в окне отображения сообщения (setMessage).
 		if(resp.success) {
 			moneyManager.setMessage(resp.success, `Пополнение счета прошло успешно`);
 		} else {
@@ -67,9 +65,6 @@ moneyManager.conversionMoneyCallback = ({ fromCurrency, targetCurrency, fromAmou
 			ProfileWidget.showProfile(resp.data);
 		}
 
-		//?проверить правильность кода:
-		//Также выведите сообщение об успехе или
-		//ошибку (причину неудачного действия) пополнении баланса в окне отображения сообщения (setMessage).
 		if(resp.success) {
 			moneyManager.setMessage(resp.success, `Конвертация валюты прошла успешно`);
 		} else {
@@ -87,9 +82,6 @@ moneyManager.sendMoneyCallback = ({ to, currency, amount }) => {
 			ProfileWidget.showProfile(resp.data);
 		}
 
-		//?проверить правильность кода:
-		//Также выведите сообщение об успехе или
-		//ошибку (причину неудачного действия) пополнении баланса в окне отображения сообщения (setMessage).
 		if(resp.success) {
 			moneyManager.setMessage(resp.success, `Перевод валюты прошел успешно`);
 		} else {
@@ -97,3 +89,15 @@ moneyManager.sendMoneyCallback = ({ to, currency, amount }) => {
 		}
 	}); 
 }
+
+//!Работа с избранным
+const favoritesWidget = new FavoritesWidget();
+
+//!начальный список избранного
+ApiConnector.getFavorites(resp => {
+	if(resp.success) {
+		favoritesWidget.clearTable();
+		favoritesWidget.fillTable(data);
+		moneyManager.updateUsersList(data);
+	}
+})
