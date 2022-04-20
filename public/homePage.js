@@ -22,7 +22,7 @@ const ratesBoard = new RatesBoard();
 
 //? ApiConnector.js:315 Произошла ошибка:  TypeError: callback is not a function
 
-//по логике мы должны прописать ratesBoard.метод = () => { ApiConnector.getStocks(resp => {....... }
+//возможно надо прописать ratesBoard.метод = () => { ApiConnector.getStocks(resp => {.......}
 //но в описании классов у RatesBoard нет подходящего метода
 ApiConnector.getStocks(resp => {
 
@@ -94,10 +94,51 @@ moneyManager.sendMoneyCallback = ({ to, currency, amount }) => {
 const favoritesWidget = new FavoritesWidget();
 
 //!начальный список избранного
-ApiConnector.getFavorites(resp => {
-	if(resp.success) {
-		favoritesWidget.clearTable();
-		favoritesWidget.fillTable(data);
-		moneyManager.updateUsersList(data);
-	}
-})
+// ApiConnector.getFavorites(resp => {
+// 	if(resp.success) {
+// 		favoritesWidget.clearTable();
+// 		favoritesWidget.fillTable(data);
+// 		moneyManager.updateUsersList(data);
+// 	}
+// });
+
+favoritesWidget.favoritesTableBody = () => {
+	ApiConnector.getFavorites(resp => {
+		if(resp.success) {
+			favoritesWidget.clearTable();
+			favoritesWidget.fillTable(data);
+			moneyManager.updateUsersList(data);
+		}
+	});
+}
+
+//!добавления пользователя в список избранных
+favoritesWidget.addUserCallback = ( {id, name} ) => {
+	ApiConnector.addUserToFavorites({id, name}, resp => {
+		console.log(resp);
+
+		if(resp.success) {
+			favoritesWidget.clearTable();
+			favoritesWidget.fillTable(data);
+			moneyManager.updateUsersList(data);
+			//почему не выводится сообщение об успехе???
+			favoritesWidget.setMessage(resp.success, `Пользователь успешно добавлен`);
+		} else {
+			favoritesWidget.setMessage(resp.success, resp.error);
+		}
+	});
+}
+
+//!удаление пользователя из избранного
+favoritesWidget.removeUserCallback = (id) => {
+	ApiConnector.removeUserFromFavorites(id, resp => {
+		if(resp.success) {
+			favoritesWidget.clearTable();
+			favoritesWidget.fillTable(data);
+			moneyManager.updateUsersList(data);
+			favoritesWidget.setMessage(resp.success, `Пользователь успешно удален`);
+		} else {
+			favoritesWidget.setMessage(resp.success, resp.error);
+		}
+	});
+}
