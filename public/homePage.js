@@ -12,6 +12,7 @@ logoutButton.action = () => ApiConnector.logout(resp => {
 //!Получение информации о пользователе
 ApiConnector.current(resp => {
 	// console.log(resp);
+	
 	if(resp.success) {
 		ProfileWidget.showProfile(resp.data);
 	}
@@ -31,17 +32,65 @@ ApiConnector.getStocks(resp => {
 });
 
 // console.log(typeof ApiConnector.getStocks);
-setTimeout(ApiConnector.getStocks, 60000);
+//setTimeout(ApiConnector.getStocks, 60000); //??
 
 //!Операции с деньгами
 const moneyManager = new MoneyManager();
 // console.log(moneyManager);
 
-// //???Используйте аргумент функции свойства addMoneyCallback для передачи данных data в запрос.
-// moneyManager.addMoneyCallback = (data) => {
-// 	ApiConnector.addMoney({ currency, amount }, resp => {
+//!пополнение баланса
+moneyManager.addMoneyCallback = ({ currency, amount }) => {
+	ApiConnector.addMoney({ currency, amount }, resp => {
+		console.log(resp);
 
-// 	}) 
-// };
+		if(resp.success) {
+			ProfileWidget.showProfile(resp.data);
+		}
 
-// moneyManager.addMoneyCallback();
+		//Также выведите сообщение об успехе или
+		//ошибку (причину неудачного действия) пополнении баланса в окне отображения сообщения (setMessage).
+		if(resp.success) {
+			moneyManager.setMessage(resp.success, `Пополнение счета прошло успешно`);
+		} else {
+			moneyManager.setMessage(resp.success, resp.error);
+		}
+	});
+}
+
+//!конвертирование валюты
+moneyManager.conversionMoneyCallback = ({ fromCurrency, targetCurrency, fromAmount }) => {
+	ApiConnector.convertMoney({ fromCurrency, targetCurrency, fromAmount }, resp => {
+		// console.log(resp);
+
+		if(resp.success) {
+			ProfileWidget.showProfile(resp.data);
+		}
+
+		//Также выведите сообщение об успехе или
+		//ошибку (причину неудачного действия) пополнении баланса в окне отображения сообщения (setMessage).
+		if(resp.success) {
+			moneyManager.setMessage(resp.success, `Конвертация валюты прошла успешно`);
+		} else {
+			moneyManager.setMessage(resp.success, resp.error);
+		}
+	});
+}
+
+//!перевод валюты
+moneyManager.sendMoneyCallback = ({ to, currency, amount }) => {
+	ApiConnector.transferMoney({ to, currency, amount }, resp => {
+		// console.log(resp);
+
+		if(resp.success) {
+			ProfileWidget.showProfile(resp.data);
+		}
+
+		//Также выведите сообщение об успехе или
+		//ошибку (причину неудачного действия) пополнении баланса в окне отображения сообщения (setMessage).
+		if(resp.success) {
+			moneyManager.setMessage(resp.success, `Перевод валюты прошел успешно`);
+		} else {
+			moneyManager.setMessage(resp.success, resp.error);
+		}
+	}); 
+}
