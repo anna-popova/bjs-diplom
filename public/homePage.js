@@ -20,35 +20,29 @@ ApiConnector.current(resp => {
 //!Получение текущих курсов валюты
 const ratesBoard = new RatesBoard();
 
-//? ApiConnector.js:315 Произошла ошибка:  TypeError: callback is not a function
+function refreshStocks() {
+	ApiConnector.getStocks(resp => {
 
-//возможно надо прописать ratesBoard.метод = () => { ApiConnector.getStocks(resp => {.......}
-//но в описании классов у RatesBoard нет подходящего метода
-ApiConnector.getStocks(resp => {
+		if(resp.success) {
+			ratesBoard.clearTable();
+			ratesBoard.fillTable(resp.data);
+		}
+	});
+}
 
-	if(resp.success) {
-		ratesBoard.clearTable();
-		ratesBoard.fillTable(resp.data);
-	}
-});
-
-ApiConnector.getStocks();
-// console.log(typeof ApiConnector.getStocks);
-setTimeout(ApiConnector.getStocks, 60000);
+refreshStocks();
+setTimeout(refreshStocks, 60000);
 
 //!Операции с деньгами
 const moneyManager = new MoneyManager();
 
 //!пополнение баланса
-moneyManager.addMoneyCallback = ({ currency, amount }) => {
-	ApiConnector.addMoney({ currency, amount }, resp => {
-		// console.log(resp);
+moneyManager.addMoneyCallback = (data) => {
+
+	ApiConnector.addMoney(data, resp => {
 
 		if(resp.success) {
 			ProfileWidget.showProfile(resp.data);
-		}
-
-		if(resp.success) {
 			moneyManager.setMessage(resp.success, `Пополнение счета прошло успешно`);
 		} else {
 			moneyManager.setMessage(resp.success, resp.error);
@@ -57,15 +51,11 @@ moneyManager.addMoneyCallback = ({ currency, amount }) => {
 }
 
 //!конвертирование валюты
-moneyManager.conversionMoneyCallback = ({ fromCurrency, targetCurrency, fromAmount }) => {
-	ApiConnector.convertMoney({ fromCurrency, targetCurrency, fromAmount }, resp => {
-		// console.log(resp);
+moneyManager.conversionMoneyCallback = (data) => {
+	ApiConnector.convertMoney(data, resp => {
 
 		if(resp.success) {
 			ProfileWidget.showProfile(resp.data);
-		}
-
-		if(resp.success) {
 			moneyManager.setMessage(resp.success, `Конвертация валюты прошла успешно`);
 		} else {
 			moneyManager.setMessage(resp.success, resp.error);
@@ -74,15 +64,11 @@ moneyManager.conversionMoneyCallback = ({ fromCurrency, targetCurrency, fromAmou
 }
 
 //!перевод валюты
-moneyManager.sendMoneyCallback = ({ to, currency, amount }) => {
-	ApiConnector.transferMoney({ to, currency, amount }, resp => {
-		// console.log(resp);
+moneyManager.sendMoneyCallback = (data) => {
+	ApiConnector.transferMoney(data, resp => {
 
 		if(resp.success) {
 			ProfileWidget.showProfile(resp.data);
-		}
-
-		if(resp.success) {
 			moneyManager.setMessage(resp.success, `Перевод валюты прошел успешно`);
 		} else {
 			moneyManager.setMessage(resp.success, resp.error);
@@ -94,13 +80,27 @@ moneyManager.sendMoneyCallback = ({ to, currency, amount }) => {
 const favoritesWidget = new FavoritesWidget();
 
 //!начальный список избранного
-// ApiConnector.getFavorites(resp => {
-// 	if(resp.success) {
-// 		favoritesWidget.clearTable();
-// 		favoritesWidget.fillTable(data);
-// 		moneyManager.updateUsersList(data);
-// 	}
-// });
+//можно сократить код. вместо строк 113-129 записать:
+// function refreshFavorites() {
+// 	ApiConnector.getFavorites(resp => {
+// 		if(resp.success) {
+// 			favoritesWidget.clearTable();
+// 			favoritesWidget.fillTable(resp.data);
+// 			moneyManager.updateUsersList(resp.data);
+// 		}
+// 	});
+// }
+
+// favoritesWidget.favoritesTableBody = refreshFavorites;
+// refreshFavorites();
+
+ApiConnector.getFavorites(resp => {
+	if(resp.success) {
+		favoritesWidget.clearTable();
+		favoritesWidget.fillTable(resp.data);
+		moneyManager.updateUsersList(resp.data);
+	}
+});
 
 favoritesWidget.favoritesTableBody = () => {
 	ApiConnector.getFavorites(resp => {
@@ -113,15 +113,13 @@ favoritesWidget.favoritesTableBody = () => {
 }
 
 //!добавления пользователя в список избранных
-favoritesWidget.addUserCallback = ( {id, name} ) => {
-	ApiConnector.addUserToFavorites({id, name}, resp => {
-		console.log(resp);
+favoritesWidget.addUserCallback = (data) => {
+	ApiConnector.addUserToFavorites(data, resp => {
 
 		if(resp.success) {
 			favoritesWidget.clearTable();
-			favoritesWidget.fillTable(data);
-			moneyManager.updateUsersList(data);
-			//почему не выводится сообщение об успехе???
+			favoritesWidget.fillTable(resp.data);
+			moneyManager.updateUsersList(resp.data);
 			favoritesWidget.setMessage(resp.success, `Пользователь успешно добавлен`);
 		} else {
 			favoritesWidget.setMessage(resp.success, resp.error);
@@ -134,8 +132,8 @@ favoritesWidget.removeUserCallback = (id) => {
 	ApiConnector.removeUserFromFavorites(id, resp => {
 		if(resp.success) {
 			favoritesWidget.clearTable();
-			favoritesWidget.fillTable(data);
-			moneyManager.updateUsersList(data);
+			favoritesWidget.fillTable(resp.data);
+			moneyManager.updateUsersList(resp.data);
 			favoritesWidget.setMessage(resp.success, `Пользователь успешно удален`);
 		} else {
 			favoritesWidget.setMessage(resp.success, resp.error);
